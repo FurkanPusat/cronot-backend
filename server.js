@@ -29,6 +29,11 @@ connectDB();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Root Route
+app.get('/', (req, res) => {
+  res.send('Welcome to the API');
+});
+
 // Routes
 app.use('/api/users', usersRouter);
 app.use('/api/tasks', tasksRouter);
