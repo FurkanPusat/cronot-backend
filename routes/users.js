@@ -11,8 +11,11 @@ router.post('/register', async (req, res) => {
   const { name, email, password, avatar, phoneNumber, bio } = req.body;
 
   try {
+    console.log('Registration request received:', req.body);
+
     let user = await User.findOne({ email });
     if (user) {
+      console.log('User already exists');
       return res.status(400).json({ msg: 'User already exists' });
     }
 
@@ -36,20 +39,30 @@ router.post('/register', async (req, res) => {
       }
     };
 
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('JWT_SECRET is not defined');
+      return res.status(500).json({ msg: 'Server error: JWT_SECRET is not defined' });
+    }
+
     jwt.sign(
       payload,
-      process.env.JWT_SECRET,
+      secret,
       { expiresIn: '1h' },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('JWT signing error:', err.message);
+          throw err;
+        }
         res.json({ token });
       }
     );
   } catch (err) {
-    console.error(err.message);
+    console.error('Error during user registration:', err.message);
     res.status(500).send('Server error');
   }
 });
+
 
 // Login
 router.post('/login', async (req, res) => {
